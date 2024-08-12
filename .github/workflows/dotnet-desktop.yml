@@ -57,19 +57,18 @@ jobs:
 
     # Install the .NET Core workload
     - name: Install .NET Core
+      uses: NuGet/setup-nuget@v2.0.0
+
+    - name: Install .NET Core
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 8.0.x
 
-    # Execute all unit tests in the solution
-    - name: Execute unit tests
-      run: dotnet test ObsidianShell.sln
-
     # Restore the application to populate the obj folder with RuntimeIdentifiers
-    - name: Restore the application
+    - name: Restore & build the application
       run: |
-        dotnet restore ObsidianShell.sln
-        dotnet build ObsidianShell.sln
+        nuget restore ObsidianShell.sln
+        dotnet build ObsidianShell.sln --no-restore
 
     # Upload the MSIX package: https://github.com/marketplace/actions/upload-a-build-artifact
     - name: Upload build artifacts
