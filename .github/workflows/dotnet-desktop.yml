@@ -67,7 +67,9 @@ jobs:
 
     # Restore the application to populate the obj folder with RuntimeIdentifiers
     - name: Restore the application
-      run: dotnet build ObsidianShell.sln
+      run: |
+        dotnet restore ObsidianShell.sln
+        dotnet build ObsidianShell.sln
 
     # Upload the MSIX package: https://github.com/marketplace/actions/upload-a-build-artifact
     - name: Upload build artifacts
