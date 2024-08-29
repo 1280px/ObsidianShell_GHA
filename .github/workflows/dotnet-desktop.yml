@@ -46,8 +46,7 @@ on:
 
 jobs:
   build:
-    runs-on: windows-latest  # For a list of available runner types, refer to
-                             # https://help.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idruns-on
+    runs-on: windows-latest
 
     steps:
     - name: Checkout
@@ -55,7 +54,6 @@ jobs:
       with:
         fetch-depth: 0
 
-    # Install the .NET Core workload
     - name: Install NuGet
       uses: NuGet/setup-nuget@v2.0.0
 
@@ -68,22 +66,20 @@ jobs:
         dotnet-version: |
           7.0.x
 
-    # Restore the application to populate the obj folder with RuntimeIdentifiers
     - name: Restore & build the application
       run: |
         nuget restore ObsidianShell.sln
         msbuild ObsidianShell.sln /p:Configuration=Release /p:Platform="Any CPU"
     
-    - name: Publish projects
+    - name: Build & publish the projects
       run: |
-        dotnet publish ObsidianShell/ObsidianShell.csproj -c Release -o ./publish/ObsidianShell
-        dotnet publish ObsidianShell.CLI/ObsidianShell.CLI.csproj -c Release -o ./publish/ObsidianShell.CLI
-        dotnet publish ObsidianShell.ContextMenu/ObsidianShell.ContextMenu.csproj -c Release -o ./publish/ObsidianShell.ContextMenu
-        dotnet publish ObsidianShell.GUI/ObsidianShell.GUI.csproj -c Release -o ./publish/ObsidianShell.GUI
- 
-    # Upload the MSIX package: https://github.com/marketplace/actions/upload-a-build-artifact
+        msbuild ObsidianShell/ObsidianShell.csproj /t:Publish /p:Configuration=Release /p:PublishDir=..\publish\ObsidianShell
+        msbuild ObsidianShell.CLI/ObsidianShell.CLI.csproj /t:Publish /p:Configuration=Release /p:PublishDir=..\publish\ObsidianShell.CLI
+        msbuild ObsidianShell.ContextMenu/ObsidianShell.ContextMenu.csproj /t:Publish /p:Configuration=Release /p:PublishDir=..\publish\ObsidianShell.ContextMenu
+        msbuild ObsidianShell.GUI/ObsidianShell.GUI.csproj /t:Publish /p:Configuration=Release /p:PublishDir=..\publish\ObsidianShell.GUI
+
     - name: Upload build artifacts
       uses: actions/upload-artifact@v3
       with:
-        name: ObsidianShell-Publish
+        name: ObsidianShell_GHA
         path: ./publish
