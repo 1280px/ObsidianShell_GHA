@@ -56,20 +56,35 @@ jobs:
         fetch-depth: 0
 
     # Install the .NET Core workload
-    - name: Install .NET Core
+    - name: Install NuGet
       uses: NuGet/setup-nuget@v2.0.0
+
+    - name: Install MSBuild
+      uses: microsoft/setup-msbuild@v1.1
 
     - name: Install .NET Core
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: 7.0.x
+        dotnet-version: |
+          4.8.x
+          7.0.x
 
     # Restore the application to populate the obj folder with RuntimeIdentifiers
     - name: Restore & build the application
       run: |
         nuget restore ObsidianShell.sln
-        dotnet build ObsidianShell.sln --no-restore
-
+        msbuild ObsidianShell.sln /p:Configuration=Release /p:Platform="Any CPU"
+    
+    - name: Publish projects
+      run: |
+        dotnet publish ObsidianShell/ObsidianShell.csproj -c Release -o ./publish/ObsidianShell
+        dotnet publish ObsidianShell.CLI/ObsidianShell.CLI.csproj -c Release -o ./publish/ObsidianShell.CLI
+        dotnet publish ObsidianShell.ContextMenu/ObsidianShell.ContextMenu.csproj -c Release -o ./publish/ObsidianShell.ContextMenu
+        dotnet publish ObsidianShell.GUI/ObsidianShell.GUI.csproj -c Release -o ./publish/ObsidianShell.GUI
+ 
     # Upload the MSIX package: https://github.com/marketplace/actions/upload-a-build-artifact
     - name: Upload build artifacts
-      run: dotnet publish ObsidianShell.sln
+      uses: actions/upload-artifact@v3
+      with:
+        name: ObsidianShell-Publish
+        path: ./publish
